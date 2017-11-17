@@ -1,7 +1,13 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable class-methods-use-this */
-const { LimitedArray, getIndexBelowMax } = require('./hash-table-helpers');
-
+const { LinkedList, LimitedArray, getIndexBelowMax } = require('./hash-table-helpers');
+//  ## Challenge
+//  If you take a look at the hash-table.js file you'll notice that
+//  it has solution code in it. You'll also notice that if you run the
+//  tests, they all pass. Your job is to refactor this hash table solution
+//  to use **linked lists** for buckets instead of arrays. You're welcome
+//  to add another class to the helper file, following the pattern used
+//  with LimitedArray.
 class HashTable {
   constructor(limit = 8) {
     this.limit = limit;
@@ -12,7 +18,7 @@ class HashTable {
   resize() {
     this.limit *= 2;
     const oldStorage = this.storage;
-    this.storage = new LimitedArray(this.limit);
+    this.storage = new LinkedList(this.limit);
     oldStorage.each((bucket) => {
       if (!bucket) return;
       bucket.forEach((pair) => {
@@ -36,11 +42,11 @@ class HashTable {
   insert(key, value) {
     if (this.capacityIsFull()) this.resize();
     const index = getIndexBelowMax(key.toString(), this.limit);
-    let bucket = this.storage.get(index) || [];
+    let bucket = new LinkedList(); // the bucket would be a new LinkedList
 
     bucket = bucket.filter(item => item[0] !== key);
-    bucket.push([key, value]);
-    this.storage.set(index, bucket);
+    bucket.push({ key, value });
+    this.storage.set(index, bucket); // have to access addToTail method on the LinkedList class.
   }
   // Removes the key, value pair from the hash table
   // Fetch the bucket associated with the given key using the getIndexBelowMax function
@@ -68,5 +74,11 @@ class HashTable {
     return retrieved ? retrieved[1] : undefined;
   }
 }
+// I didn't change hardly any of the code, but my thought process was to create a LinkedList class in the hash-table-helper
+// From there I believe that changing the bucket to a linked list is where this is going.
+// How I'm envisioning the hash table is that we are sending data through a hashing function
+// which then assigns an address to the data and then the coder needs to place that data into an array?
+// and then if there is a collision the coder needs to create a linked list off that data[0] item
+// what I'm still unclear on is if with a bucket this code would need resize and capacityIsFull method
 
 module.exports = HashTable;
